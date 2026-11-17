@@ -1,0 +1,17 @@
+Package: checkoutab
+Title: A/B Test of a One-Page Checkout
+Version: 0.1.0
+Authors@R: person("Mohammad", "Haghjoo", role = c("aut", "cre"))
+Description: Design, analysis and decision for an online-shop checkout experiment:
+    power analysis, sample ratio check, frequentist and Bayesian estimates,
+    CUPED variance reduction, segment effects and the cost of peeking.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Imports:
+    ggplot2,
+    rstanarm
+Suggests:
+    knitr,
+    lintr,
+    rmarkdown,
+    testthat (>= 3.0.0)

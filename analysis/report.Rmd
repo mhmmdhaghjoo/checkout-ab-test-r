@@ -1,0 +1,97 @@
+---
+title: "Should we roll out the one-page checkout?"
+output: github_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+r <- readRDS("reports/results.rds")
+pct <- function(v, d = 1) paste0(format(round(100 * v, d), nsmall = d), "%")
+pp <- function(v, d = 2) paste0(format(round(100 * v, d), nsmall = d), " pp")
+eur <- function(v, d = 2) paste0("€", format(round(v, d), nsmall = d, big.mark = ","))
+num <- function(v) format(round(v), big.mark = ",")
+p_txt <- function(p) if (p < 0.001) "p < 0.001" else paste0("p = ", format(round(p, 3), nsmall = 3))
+mobile <- r$segments[r$segments$segment == "mobile", ]
+desktop <- r$segments[r$segments$segment == "desktop", ]
+fp <- r$peeking$summary$false_positive_rate
+monthly_gain <- r$mobile_rpv$diff * r$monthly_visitors * r$mobile_share
+```
+
+## Recommendation
+
+Roll out the one-page checkout **on mobile**, and keep the current checkout on
+desktop until a desktop test shows a benefit. On mobile, conversion rose by
+`r pp(mobile$diff_median)` (95% interval `r pp(mobile$diff_low)` to
+`r pp(mobile$diff_high)`). On desktop the effect is indistinguishable from zero.
+
+## The test
+
+The test compared the current checkout (A) with a one-page checkout (B). It ran for
+14 days with `r num(r$n_visitors)` visitors split 50/50 at random. Before the
+start, a power analysis fixed the sample size: detecting a lift of
+`r pp(r$design$mde)` from a `r pct(r$design$base_rate)` baseline with 80% power
+needs `r num(r$design$n_per_arm)` visitors per arm.
+
+**Can the data be trusted?** The split was `r num(r$srm$counts[1])` to
+`r num(r$srm$counts[2])` (sample ratio check `r p_txt(r$srm$p_value)`, so
+randomisation worked). Device mix, customer mix and pre-test spend are balanced
+across arms.
+
+## Results
+
+| Metric | A | B | B minus A (95% interval) | p-value |
+|---|---:|---:|---:|---:|
+| Conversion rate (primary) | `r pct(r$primary$rate_a, 2)` | `r pct(r$primary$rate_b, 2)` | `r pp(r$primary$diff)` (`r pp(r$primary$ci_low)` to `r pp(r$primary$ci_high)`) | `r format(signif(r$primary$p_value, 2))` |
+| Revenue per visitor | `r eur(r$rpv$mean_a)` | `r eur(r$rpv$mean_b)` | `r eur(r$rpv$diff)` (`r eur(r$rpv$ci_low)` to `r eur(r$rpv$ci_high)`) | `r format(signif(r$rpv$p_value, 2))` |
+| Revenue per visitor, CUPED | | | `r eur(r$rpv_cuped$diff)` (`r eur(r$rpv_cuped$ci_low)` to `r eur(r$rpv_cuped$ci_high)`) | `r format(signif(r$rpv_cuped$p_value, 2))` |
+| Average order value (guardrail) | `r eur(r$aov$mean_a)` | `r eur(r$aov$mean_b)` | `r eur(r$aov$diff)` (`r eur(r$aov$ci_low)` to `r eur(r$aov$ci_high)`) | `r format(signif(r$aov$p_value, 2))` |
+
+Conversion rose by `r pct(r$primary$relative_lift)` relative to A. The Bayesian
+model puts the probability that B converts better at
+`r pct(r$bayes$prob_b_better)`; the expected loss from choosing B if it is in fact
+worse is `r pp(r$bayes$expected_loss_b, 4)`.
+
+Buyers in B spend `r eur(-r$aov$diff)` less per order. The checkout wins extra
+buyers with smaller baskets. Revenue per visitor still rises, but its interval is
+wide because most visitors spend nothing. Adjusting for each visitor's spend in
+the 30 days before the test (CUPED) narrows the interval and is equivalent to
+`r pct(r$variance_reduction, 0)` less variance.
+
+![](figures/cumulative_conversion.png)
+
+![](figures/cuped.png)
+
+## Where the effect comes from
+
+![](figures/segment_effects.png)
+
+A Bayesian logistic regression (rstanarm) estimates the effect separately for
+each segment. On mobile the effect is clearly positive (probability
+`r pct(mobile$prob_positive)` that it is above zero). On desktop the interval
+spans zero (`r pp(desktop$diff_low)` to `r pp(desktop$diff_high)`).
+
+## Why the test ran its full length
+
+![](figures/peeking.png)
+
+In 2,000 simulated tests with no true difference, looking once at the planned end
+declared a false winner `r pct(fp[1])` of the time, as promised. Looking every
+day and stopping at the first p < 0.05 declared a false winner `r pct(fp[2])` of
+the time. The test was therefore read once, after 14 days.
+
+## What it is worth
+
+At about `r num(r$monthly_visitors)` visitors a month, of whom
+`r pct(r$mobile_share, 0)` are on mobile, the mobile revenue gain of
+`r eur(r$mobile_rpv$diff)` per visitor is worth roughly
+`r eur(monthly_gain, 0)` a month (95% interval
+`r eur(r$mobile_rpv$ci_low * r$monthly_visitors * r$mobile_share, 0)` to
+`r eur(r$mobile_rpv$ci_high * r$monthly_visitors * r$mobile_share, 0)`).
+
+## Caveats
+
+- The data are simulated with known effects, so the analysis can be checked
+  against the truth; the effect sizes are illustrative.
+- The segment comparison is exploratory. Desktop should get its own, properly
+  powered test before any rollout there.
+- Two weeks cannot show long-term effects such as repeat purchases or returns.
