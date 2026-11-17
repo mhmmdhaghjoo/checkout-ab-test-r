@@ -15,14 +15,15 @@ test_that("mean difference is B minus A", {
   expect_lt(res$ci_low, 10)
 })
 
-test_that("CUPED keeps the difference and reduces the variance", {
+test_that("CUPED recovers the true effect with a much narrower interval", {
   set.seed(5)
   x <- rnorm(20000, 50, 10)
   g <- rep(c("A", "B"), each = 10000)
-  y <- 0.8 * x + rnorm(20000) + (g == "B") * 1
-  adjusted <- cuped_adjust(y, x)
-  expect_equal(mean_difference(adjusted, g)$diff, mean_difference(y, g)$diff, tolerance = 0.05)
-  expect_lt(var(adjusted), var(y) / 10)
+  y <- 0.8 * x + rnorm(20000) + (g == "B") * 1  # true effect of B is exactly 1
+  raw <- mean_difference(y, g)
+  adjusted <- mean_difference(cuped_adjust(y, x), g)
+  expect_equal(adjusted$diff, 1, tolerance = 0.05)
+  expect_lt(adjusted$ci_high - adjusted$ci_low, (raw$ci_high - raw$ci_low) / 3)
 })
 
 test_that("Bayesian probability is near 0.5 for identical arms and near 1 for a clear win", {
