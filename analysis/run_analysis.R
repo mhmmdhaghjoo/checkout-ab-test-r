@@ -109,7 +109,7 @@ save_plot(p2, "segment_effects.png", height = 3.6)
 
 p3 <- ggplot(peeking$by_day, aes(day, false_positive_rate)) +
   geom_hline(yintercept = 0.05, colour = orange, linetype = "dashed") +
-  annotate("text", x = 1, y = 0.06, label = "5% promised by the test", hjust = 0, colour = orange) +
+  annotate("text", x = 14, y = 0.035, label = "5% promised by the test", hjust = 1, colour = orange) +
   geom_line(colour = blue, linewidth = 1) +
   geom_point(colour = blue) +
   scale_y_continuous(labels = pct, limits = c(0, NA)) +

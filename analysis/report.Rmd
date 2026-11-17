@@ -8,7 +8,10 @@ knitr::opts_chunk$set(echo = FALSE)
 r <- readRDS("reports/results.rds")
 pct <- function(v, d = 1) paste0(format(round(100 * v, d), nsmall = d), "%")
 pp <- function(v, d = 2) paste0(format(round(100 * v, d), nsmall = d), " pp")
-eur <- function(v, d = 2) paste0("€", format(round(v, d), nsmall = d, big.mark = ","))
+eur <- function(v, d = 2) {
+  paste0(ifelse(v < 0, "\u2212", ""), "€", format(round(abs(v), d), nsmall = d, big.mark = ","))
+}
+prob <- function(v) if (v > 0.999) "more than 99.9%" else pct(v)
 num <- function(v) format(round(v), big.mark = ",")
 p_txt <- function(p) if (p < 0.001) "p < 0.001" else paste0("p = ", format(round(p, 3), nsmall = 3))
 mobile <- r$segments[r$segments$segment == "mobile", ]
@@ -48,14 +51,27 @@ across arms.
 
 Conversion rose by `r pct(r$primary$relative_lift)` relative to A. The Bayesian
 model puts the probability that B converts better at
-`r pct(r$bayes$prob_b_better)`; the expected loss from choosing B if it is in fact
-worse is `r pp(r$bayes$expected_loss_b, 4)`.
+`r prob(r$bayes$prob_b_better)`. The expected loss from choosing B (the conversion
+given up if B is in fact worse, weighted by how likely that is) is
+`r if (r$bayes$expected_loss_b < 1e-5) "below 0.001 pp" else pp(r$bayes$expected_loss_b, 4)`,
+so the risk of rolling it out is negligible.
 
-Buyers in B spend `r eur(-r$aov$diff)` less per order. The checkout wins extra
-buyers with smaller baskets. Revenue per visitor still rises, but its interval is
-wide because most visitors spend nothing. Adjusting for each visitor's spend in
-the 30 days before the test (CUPED) narrows the interval and is equivalent to
-`r pct(r$variance_reduction, 0)` less variance.
+Buyers in B spend `r eur(-r$aov$diff)` less per order (`r p_txt(r$aov$p_value)`, so this
+guardrail needs watching after rollout). The checkout wins extra buyers with
+smaller baskets, and revenue per visitor still rises.
+
+```{r cuped-text, results = "asis"}
+if (r$variance_reduction < 0.1) {
+  cat("Adjusting for each visitor's spend in the 30 days before the test (CUPED)",
+      "reduced the variance by only", pct(r$variance_reduction, 0), "here. Most visitors",
+      "are new and spent nothing before, so past spend predicts little of two weeks'",
+      "revenue. CUPED pays off when a strong pre-period metric exists, for example",
+      "visits or sessions for an engagement metric.")
+} else {
+  cat("Adjusting for each visitor's spend in the 30 days before the test (CUPED)",
+      "reduced the variance by", pct(r$variance_reduction, 0), "and narrowed the interval.")
+}
+```
 
 ![](figures/cumulative_conversion.png)
 
@@ -67,7 +83,7 @@ the 30 days before the test (CUPED) narrows the interval and is equivalent to
 
 A Bayesian logistic regression (rstanarm) estimates the effect separately for
 each segment. On mobile the effect is clearly positive (probability
-`r pct(mobile$prob_positive)` that it is above zero). On desktop the interval
+`r prob(mobile$prob_positive)` that it is above zero). On desktop the interval
 spans zero (`r pp(desktop$diff_low)` to `r pp(desktop$diff_high)`).
 
 ## Why the test ran its full length
