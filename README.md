@@ -67,7 +67,7 @@ Requires R 4.1 or later.
 
 ```r
 install.packages(c("ggplot2", "rstanarm", "rmarkdown", "knitr", "testthat", "lintr"))
-testthat::test_dir("tests/testthat")   # 15 tests
+testthat::test_dir("tests/testthat")   # 11 tests
 source("analysis/run_analysis.R")      # writes reports/
 ```
 
