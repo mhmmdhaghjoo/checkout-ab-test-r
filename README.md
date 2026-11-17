@@ -81,7 +81,7 @@ analysis and commits the rendered report.
 - [Customer Churn ML Pipeline](https://github.com/mhmmdhaghjoo/customer-churn-ml-pipeline): churn prediction as a tested Python package
 - [Text-to-SQL Assistant](https://github.com/mhmmdhaghjoo/text-to-sql-assistant): LLM-written SQL with a read-only guard
 
-More about me: [github.com/mhmmdhaghjoo](https://github.com/mhmmdhaghjoo)
+More about me: [mhmmdhaghjoo.github.io](https://mhmmdhaghjoo.github.io) and [github.com/mhmmdhaghjoo](https://github.com/mhmmdhaghjoo)
 
 ## Licence
 
