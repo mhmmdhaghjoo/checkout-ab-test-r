@@ -27,17 +27,23 @@ mix and pre-test spend are balanced across arms.
 | Conversion rate (primary) | 2.93% | 3.44% | 0.51 pp (0.27 pp to 0.75 pp) | 4e-05 |
 | Revenue per visitor | €2.04 | €2.30 | €0.27 (€0.08 to €0.45) | 0.0058 |
 | Revenue per visitor, CUPED |  |  | €0.27 (€0.08 to €0.45) | 0.0042 |
-| Average order value (guardrail) | €69.59 | €66.99 | €-2.60 (€-5.41 to €0.21) | 0.07 |
+| Average order value (guardrail) | €69.59 | €66.99 | −€2.60 (−€5.41 to €0.21) | 0.07 |
 
 Conversion rose by 17.4% relative to A. The Bayesian model puts the
-probability that B converts better at 100.0%; the expected loss from
-choosing B if it is in fact worse is 0.0000 pp.
+probability that B converts better at more than 99.9%. The expected loss
+from choosing B (the conversion given up if B is in fact worse, weighted
+by how likely that is) is below 0.001 pp, so the risk of rolling it out
+is negligible.
 
-Buyers in B spend €2.60 less per order. The checkout wins extra buyers
-with smaller baskets. Revenue per visitor still rises, but its interval
-is wide because most visitors spend nothing. Adjusting for each
-visitor’s spend in the 30 days before the test (CUPED) narrows the
-interval and is equivalent to 4% less variance.
+Buyers in B spend €2.60 less per order (p = 0.070, so this guardrail
+needs watching after rollout). The checkout wins extra buyers with
+smaller baskets, and revenue per visitor still rises.
+
+Adjusting for each visitor’s spend in the 30 days before the test
+(CUPED) reduced the variance by only 4% here. Most visitors are new and
+spent nothing before, so past spend predicts little of two weeks’
+revenue. CUPED pays off when a strong pre-period metric exists, for
+example visits or sessions for an engagement metric.
 
 ![](figures/cumulative_conversion.png)
 
@@ -49,8 +55,8 @@ interval and is equivalent to 4% less variance.
 
 A Bayesian logistic regression (rstanarm) estimates the effect
 separately for each segment. On mobile the effect is clearly positive
-(probability 100.0% that it is above zero). On desktop the interval
-spans zero (-0.25 pp to 0.62 pp).
+(probability more than 99.9% that it is above zero). On desktop the
+interval spans zero (-0.25 pp to 0.62 pp).
 
 ## Why the test ran its full length
 
