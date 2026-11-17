@@ -1,0 +1,3 @@
+"strategy","false_positive_rate"
+"Look once, at the planned end",0.045
+"Look daily, stop at first p < 0.05",0.218
