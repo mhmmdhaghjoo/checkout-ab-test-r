@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: write
+
 jobs:
   analysis:
     runs-on: ubuntu-latest
@@ -32,7 +35,11 @@ jobs:
         shell: Rscript {0}
       - name: Run analysis and render report
         run: Rscript analysis/run_analysis.R
-      - uses: actions/upload-artifact@v4
-        with:
-          name: reports
-          path: reports/
+      - name: Commit the rendered report
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898338+github-actions[bot]@users.noreply.github.com"
+          git add reports
+          git diff --cached --quiet || git commit -m "Update rendered report [skip ci]"
+          git push
