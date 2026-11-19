@@ -79,7 +79,7 @@ analysis and commits the rendered report.
 - [Employee Turnover Analytics](https://github.com/mhmmdhaghjoo/employee-turnover-analytics): people analytics on ten years of HR records
 - [Online Retail SQL Warehouse](https://github.com/mhmmdhaghjoo/online-retail-sql-warehouse): raw exports to a tested star schema in PostgreSQL
 - [Customer Churn ML Pipeline](https://github.com/mhmmdhaghjoo/customer-churn-ml-pipeline): churn prediction as a tested Python package
-- [Delivery Performance Analytics](https://github.com/mhmmdhaghjoo/delivery-performance-analytics): is the delivery promise kept? Real marketplace data and tested KPIs for logistics (Power BI dashboard in progress)
+- [Delivery Performance Analytics](https://github.com/mhmmdhaghjoo/delivery-performance-analytics): is the delivery promise kept? Real marketplace data, tested KPIs and a Power BI dashboard for logistics
 
 More about me: [mhmmdhaghjoo.github.io](https://mhmmdhaghjoo.github.io) and [github.com/mhmmdhaghjoo](https://github.com/mhmmdhaghjoo)
 
