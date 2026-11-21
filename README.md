@@ -45,6 +45,7 @@ from the code on every push.
 | Money metrics | `mean_difference()`, `cuped_adjust()` | Welch t-test on revenue per visitor and order value; CUPED variance reduction |
 | Bayesian view | `beta_binomial()`, `segment_effects()` | Beta-binomial probability that B is better and expected loss; Bayesian logistic regression by segment with rstanarm |
 | Peeking | `peeking_simulation()` | Monte Carlo of 2,000 A/A tests with daily looks |
+| Planning | `days_needed()`, `segment_table()` | Test length in whole weeks; conversion difference per segment |
 | Report | `analysis/report.Rmd` | R Markdown; every number in the text is computed, none typed |
 
 The statistics follow *Introduction to Modern Statistics* (Çetinkaya-Rundel
@@ -61,13 +62,39 @@ average order value slightly. That makes it possible to check that the
 analysis recovers the truth, which the tests do. The numbers are illustrative,
 not evidence about a real shop.
 
+## Interactive app (Shiny)
+
+`app/app.R` lets you plan and read the experiment yourself, using the same
+tested functions as the report:
+
+1. **Plan:** sample size per arm and test length in whole weeks for a chosen
+   base rate, smallest lift worth detecting, power and traffic.
+2. **Run and read:** simulate the experiment with true effects you choose,
+   check the sample ratio, and compare the estimated lift per device with
+   the true lift (red cross). The default run reproduces the numbers above.
+3. **The cost of peeking:** A/A simulations with daily looks.
+4. **How to check this:** what I verify before trusting an analysis like this
+   one, mine or an AI assistant's.
+
+![Shiny app, run and read](reports/figures/app_run.png)
+
+```r
+install.packages(c("shiny", "ggplot2", "scales"))
+shiny::runApp("app")
+```
+
+The simulator scales the lift you enter by each visitor's baseline
+conversion, so the true lift in a segment is not the number you type;
+`true_segment_lift()` recomputes it, and a test checks that the estimate's
+interval covers it. Runs locally; not deployed.
+
 ## Run it
 
 Requires R 4.1 or later.
 
 ```r
-install.packages(c("ggplot2", "rstanarm", "rmarkdown", "knitr", "testthat", "lintr"))
-testthat::test_dir("tests/testthat")   # 11 tests
+install.packages(c("ggplot2", "rstanarm", "rmarkdown", "knitr", "testthat", "lintr", "shiny", "scales"))
+testthat::test_dir("tests/testthat")   # 16 tests, including a server test of the app
 source("analysis/run_analysis.R")      # writes reports/
 ```
 
@@ -79,7 +106,6 @@ analysis and commits the rendered report.
 - [Employee Turnover Analytics](https://github.com/mhmmdhaghjoo/employee-turnover-analytics): people analytics on ten years of HR records
 - [Online Retail SQL Warehouse](https://github.com/mhmmdhaghjoo/online-retail-sql-warehouse): raw exports to a tested star schema in PostgreSQL
 - [Customer Churn ML Pipeline](https://github.com/mhmmdhaghjoo/customer-churn-ml-pipeline): churn prediction as a tested Python package
-- [Delivery Performance Analytics](https://github.com/mhmmdhaghjoo/delivery-performance-analytics): is the delivery promise kept? Real marketplace data, tested KPIs and a Power BI dashboard for logistics
 
 More about me: [mhmmdhaghjoo.github.io](https://mhmmdhaghjoo.github.io) and [github.com/mhmmdhaghjoo](https://github.com/mhmmdhaghjoo)
 

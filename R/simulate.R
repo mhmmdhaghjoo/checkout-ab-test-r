@@ -39,3 +39,21 @@ simulate_experiment <- function(n_visitors = 80000, days = 14, seed = 2026,
     stringsAsFactors = FALSE
   )
 }
+
+# The true average lift in each segment of a simulated experiment.
+# simulate_experiment() scales the lift by each visitor's baseline
+# conversion, so the lift a segment really gets differs from the
+# lift_mobile / lift_desktop arguments. This recomputes it from the same
+# formula, which is what an estimate should be compared with.
+true_segment_lift <- function(data, segment = "device", base_rate = 0.03,
+                              lift_mobile = 0.007, lift_desktop = 0) {
+  returning <- data$customer == "returning"
+  device_factor <- ifelse(data$device == "desktop", 1.3, 0.8)
+  score <- device_factor * ifelse(returning, 1 + data$pre_spend / 40, 0.6)
+  p_base <- base_rate * score / mean(score)
+  lift <- ifelse(data$device == "mobile", lift_mobile, lift_desktop) * p_base / base_rate
+  lift <- pmin(p_base + lift, 0.95) - p_base
+  out <- stats::aggregate(lift, list(segment = data[[segment]]), mean)
+  names(out)[2] <- "true_lift"
+  out
+}
